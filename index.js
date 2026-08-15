@@ -103,6 +103,33 @@ app.command("/slair-dog", async ({ command, ack, client }) => {
     })
 });
 
+app.command("/slair-uselessfact", async ({ command, ack, client }) => {
+  await ack();
+  const loading = await client.chat.postMessage({ channel: command.channel_id, text: `Searching the internet for some useless facts!`});
+
+  async function fetchUselessFact() {
+            try {
+                const response = await fetch('https://uselessfacts.jsph.pl/random.json?language=en');
+                const data = await response.json();
+
+                const uselessFact = data.text;
+                return uselessFact;
+            } catch {
+                // Error Handling: If bot wasn't able to fetch a useless fact from the API
+                await client.chat.update({channel: command.channel_id, ts: loading.ts, text: `Oops! I wasn't able to find a useless fact! I'm sorry!`})
+            }
+    };
+
+    const uselessFact = await fetchUselessFact();
+
+    await client.chat.update({
+        channel: command.channel_id,
+        ts: loading.ts,
+        text: `*Useless Fact:* ${uselessFact}`,
+    })
+
+});
+
 (async () => {
   await app.start();
   console.log("Bot has started running! Try a command!");
