@@ -59,7 +59,51 @@ app.command("/slair-cat", async ({ command, ack, client }) => {
     })
 });
 
+app.command("/slair-dog", async ({ command, ack, client }) => {
+  await ack();
+  const loading = await client.chat.postMessage({ channel: command.channel_id, text: `Searching the internet for some cute dog images!` });
+
+  async function fetchDogImage() {
+            try {
+                const response = await fetch('https://api.thedogapi.com/v1/images/search');
+                const data = await response.json();
+
+                const dogImageURL = data[0].url;
+                return dogImageURL;
+            } catch {
+                // Error Handling: If bot wasn't able to fetch a dog image from the API
+                await client.chat.update({channel: command.channel_id, ts: loading.ts, text: `NOOOO! I wasn't able to search for a dog image! I'm sorry!`})
+            }
+    };
+
+    const imageURL = await fetchDogImage();
+
+    await client.chat.delete({
+        channel: command.channel_id,
+        ts: loading.ts,
+    })
+
+    await client.chat.postMessage({
+        channel: command.channel_id,
+        text: "Ayy! I was able to find a cute dog image! Here you go!",
+        blocks: [
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: 'Here is the cute dog image I found for you:'
+                }
+            },
+            {
+                type: 'image',
+                image_url: imageURL,
+                alt_text: 'A picture of a cute dog!'
+            }
+        ]
+    })
+});
+
 (async () => {
   await app.start();
-  console.log("bot is running!");
+  console.log("Bot has started running! Try a command!");
 })();
