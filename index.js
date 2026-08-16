@@ -234,6 +234,90 @@ app.view("crypto_name_modal", async ({ ack, body, view, client }) => {
   }
 });
 
+app.command("/slair-8ball", async ({ body, ack, client, command }) => {
+  await ack();
+
+  try {
+    await client.views.open({
+      trigger_id: body.trigger_id,
+      view: {
+        type: "modal",
+        callback_id: "8ball_question_modal",
+        private_metadata: command.channel_id,
+        title: { type: "plain_text", text: "8Ball Question Modal" },
+        submit: { type: "plain_text", text: "Submit" },
+        close: { type: "plain_text", text: "Cancel" },
+        blocks: [
+          {
+            type: "input",
+            block_id: "8ball_question_block",
+            element: {
+              type: "plain_text_input",
+              action_id: "8ball_question_input",
+              placeholder: {
+                type: "plain_text",
+                text: "Ask a question you want the 8Ball to answer.",
+              },
+            },
+            label: {
+              type: "plain_text",
+              text: "Enter your question here of which you want the prediction.",
+            },
+          },
+        ],
+      },
+    });
+  } catch (error) {
+    console.error("Error opening modal:", error);
+  }
+});
+
+app.view("8ball_question_modal", async ({ ack, body, view, client }) => {
+  await ack();
+
+  const channelID = view.private_metadata;
+
+  try {
+    const userInput =
+      view.state.values["8ball_question_block"]["8ball_question_input"].value;
+
+    try {
+      const answers = [
+        "Yep Definitely!",
+        "Not at all!",
+        "Nope",
+        "Yep",
+        "What kind of question is this? Obviously no!",
+        "Never!",
+        "I'm not sure about this one.",
+        "Yeah!",
+        "Maybe!",
+        "There is a high chance of that happening!",
+        "No.",
+        "Very unlikely.",
+        "I'm doubtful that's gonna happen",
+        "Without a doubt!",
+        "Absolutely!",
+      ];
+
+      const botPrediction = answers[Math.floor(Math.random() * answers.length)];
+
+      await client.chat.postMessage({
+        channel: channelID,
+        text: `*The Magic 8 Ball!*\nQuestion: *${userInput}*\nBot's Prediction: *${botPrediction}*`,
+      });
+    } catch (error) {
+      console.error(error);
+      await client.chat.postMessage({
+        channel: channelID,
+        text: "I encountered an error while generating the prediction.",
+      });
+    }
+  } catch (error) {
+    console.error("Error handling modal submission:", error);
+  }
+});
+
 (async () => {
   await app.start();
   console.log("Bot has started running! Try a command!");
