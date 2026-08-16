@@ -472,6 +472,254 @@ app.action("guess_tails", async ({ ack, body, action, client }) => {
   }
 });
 
+app.command("/slair-rps", async ({ ack, client, command }) => {
+  await ack();
+  try {
+    const botChoice = ["Rock", "Paper", "Scissors"];
+    const botResult = botChoice[Math.floor(Math.random() * botChoice.length)];
+    await client.chat.postMessage({
+      channel: command.channel_id,
+      text: "Rock Paper Scissors Shoot! I've picked my move. Pick yours below",
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: "Rock Paper Scissors Shoot! I've picked my move. Pick yours below",
+            emoji: true,
+          },
+        },
+        {
+          type: "actions",
+          elements: [
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Rock",
+              },
+              style: "primary",
+              action_id: "guess_rock",
+              value: botResult,
+            },
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Paper",
+              },
+              style: "primary",
+              action_id: "guess_paper",
+              value: botResult,
+            },
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Scissors",
+              },
+              style: "primary",
+              action_id: "guess_scissors",
+              value: botResult,
+            },
+          ],
+        },
+      ],
+    });
+  } catch {
+    console.error("Error occurred:", error);
+  }
+});
+
+app.action("guess_rock", async ({ ack, body, action, client }) => {
+  await ack();
+
+  const channelID = body.channel.id;
+  const messageTS = body.message.ts;
+  const botResult = action.value;
+
+  try {
+    if (botResult == "Rock") {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Rock! I picked Rock\nIt's a tie!",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Rock! I picked Rock\nIt's a tie!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    } else if (botResult == "Paper") {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Rock! I picked Paper\nI Won!",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Rock! I picked Paper\nI Won!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    } else {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Rock! I picked Scissors\nYou Won! Well, I wanted to win! :(",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Rock! I picked Scissors\nYou Won! Well, I wanted to win! :(",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    }
+  } catch {
+    console.error("Error occurred:", error);
+  }
+});
+
+app.action("guess_paper", async ({ ack, body, action, client }) => {
+  await ack();
+
+  const channelID = body.channel.id;
+  const messageTS = body.message.ts;
+  const botResult = action.value;
+
+  try {
+    if (botResult == "Paper") {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Paper! I picked Paper\nIt's a tie!",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Paper! I picked Paper\nIt's a tie!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    } else if (botResult == "Rock") {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Paper! I picked Rock\nYou Won! Well, I wanted to win! :(",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Paper! I picked Rock\nYou Won! Well, I wanted to win! :(",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    } else {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Paper! I picked Scissors\nI Won!",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Paper! I picked Scissors\nI Won!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    }
+  } catch {
+    console.error("Error occurred:", error);
+  }
+});
+
+app.action("guess_scissors", async ({ ack, body, action, client }) => {
+  await ack();
+
+  const channelID = body.channel.id;
+  const messageTS = body.message.ts;
+  const botResult = action.value;
+
+  try {
+    if (botResult == "Scissors") {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Scissors! I picked Scissors\nIt's a tie!",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Scissors! I picked Scissors\nIt's a tie!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    } else if (botResult == "Paper") {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Scissors! I picked Paper\nYou Won! Well, I wanted to win! :(",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Scissors! I picked Paper\nYou Won! Well, I wanted to win! :(",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    } else {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "You picked Scissors! I picked Rock\nI Won!",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You picked Scissors! I picked Rock\nI Won!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    }
+  } catch {
+    console.error("Error occurred:", error);
+  }
+});
+
 (async () => {
   await app.start();
   console.log("Bot has started running! Try a command!");
