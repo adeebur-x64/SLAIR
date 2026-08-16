@@ -272,7 +272,7 @@ app.command("/slair-8ball", async ({ body, ack, client, command }) => {
   }
 });
 
-app.view("8ball_question_modal", async ({ ack, body, view, client }) => {
+app.view("8ball_question_modal", async ({ ack, view, client }) => {
   await ack();
 
   const channelID = view.private_metadata;
@@ -315,6 +315,160 @@ app.view("8ball_question_modal", async ({ ack, body, view, client }) => {
     }
   } catch (error) {
     console.error("Error handling modal submission:", error);
+  }
+});
+
+app.command("/slair-coinflip", async ({ ack, client, command }) => {
+  await ack();
+
+  const flipping = await client.chat.postMessage({
+    channel: command.channel_id,
+    text: "*Flipping a coin...*",
+  });
+
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  await delay(1000);
+
+  try {
+    const coinFlipResults = ["Heads", "Tails"];
+    const botPrediction =
+      coinFlipResults[Math.floor(Math.random() * coinFlipResults.length)];
+
+    const guessResponse = await client.chat.update({
+      channel: command.channel_id,
+      ts: flipping.ts,
+      text: `The coin has flipped! Guess whether it landed on heads or tails!`,
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: "The coin has flipped! Guess whether it landed on heads or tails!",
+            emoji: true,
+          },
+        },
+        {
+          type: "actions",
+          elements: [
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Heads",
+              },
+              style: "primary",
+              action_id: "guess_heads",
+              value: botPrediction,
+            },
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                emoji: true,
+                text: "Tails",
+              },
+              style: "danger",
+              action_id: "guess_tails",
+              value: botPrediction,
+            },
+          ],
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("Error occurred:", error);
+  }
+});
+
+app.action("guess_heads", async ({ ack, body, action, client }) => {
+  await ack();
+
+  const channelID = body.channel.id;
+  const messageTS = body.message.ts;
+  const botPrediction = action.value;
+
+  try {
+    if (botPrediction == "Heads") {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "*You guessed it right! The coin landed on Heads!*",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You guessed it right! The coin landed on Heads!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    } else {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "*Nuh Uh! The coin landed on Tails while your guess was Heads!*",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "Nuh Uh! The coin landed on Tails while your guess was Heads!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    }
+  } catch {}
+});
+
+app.action("guess_tails", async ({ ack, body, action, client }) => {
+  await ack();
+
+  const channelID = body.channel.id;
+  const messageTS = body.message.ts;
+  const botPrediction = action.value;
+
+  try {
+    if (botPrediction == "Tails") {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "*You guessed it right! The coin landed on Tails!*",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "You guessed it right! The coin landed on Tails!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    } else {
+      await client.chat.update({
+        channel: channelID,
+        ts: messageTS,
+        text: "*Nuh Uh! The coin landed on Heads while your guess was Tails!*",
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "Nuh Uh! The coin landed on Heads while your guess was Tails!",
+              emoji: true,
+            },
+          },
+        ],
+      });
+    }
+  } catch (error) {
+    console.error("Error occurred:", error);
   }
 });
 
