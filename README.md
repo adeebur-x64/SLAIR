@@ -34,7 +34,7 @@
 `~/SLAIR` is designed to be a small, fun, free-to-use bot that aims to add a bunch of entertaining features to your server.
 
 <details>
-<summary><strong>🎮 Mini Games</strong> · 5 commands</summary>
+<summary><strong>🎮 Mini Games</strong> · 4 commands</summary>
 
 <br>
 
