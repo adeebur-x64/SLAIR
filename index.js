@@ -948,6 +948,264 @@ app.action("give_up_btn", async ({ ack, body, action, client }) => {
   }
 });
 
+app.command("/slair-guessthenumber", async ({ command, ack, client }) => {
+  await ack();
+
+  const loading = await client.chat.postMessage({
+    channel: command.channel_id,
+    text: `I'm thinking of a number between 1 and 100!`,
+  });
+
+  async function fetchARandomNumber() {
+    try {
+      const number = Math.floor(Math.random() * 100) + 1;
+      return number;
+    } catch {
+      await client.chat.update({
+        channel: command.channel_id,
+        ts: loading.ts,
+        text: `Oops! I wasn't able to think of a number!`,
+      });
+      return null;
+    }
+  }
+
+  const randomNumber = await fetchARandomNumber();
+  if (!randomNumber) return;
+
+  const gameState = JSON.stringify({
+    number: randomNumber,
+    attempts: 0,
+  });
+
+  await client.chat.update({
+    channel: command.channel_id,
+    ts: loading.ts,
+    text: `I have chosen a number between 1 and 100! Can you guess it?`,
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `I have chosen a number between 1 and 100! Can you guess it?`,
+        },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              emoji: true,
+              text: "Guess",
+            },
+            style: "primary",
+            action_id: "guess_btn",
+            value: gameState,
+          },
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              emoji: true,
+              text: "Give up",
+            },
+            style: "danger",
+            action_id: "give_up_btn",
+            value: gameState,
+          },
+        ],
+      },
+    ],
+  });
+});
+
+app.action("guess_btn", async ({ ack, body, action, client }) => {
+  await ack();
+
+  try {
+    const gameState = JSON.parse(action.value);
+    const metadata = JSON.stringify({
+      channelId: body.channel.id,
+      messageTs: body.message.ts,
+      number: gameState.number,
+      attempts: gameState.attempts,
+    });
+
+    await client.views.open({
+      trigger_id: body.trigger_id,
+      view: {
+        type: "modal",
+        callback_id: "num_guess_modal",
+        private_metadata: metadata,
+        title: { type: "plain_text", text: "Enter your guess" },
+        submit: { type: "plain_text", text: "Submit" },
+        close: { type: "plain_text", text: "Cancel" },
+        blocks: [
+          {
+            type: "input",
+            block_id: "num_guess_block",
+            element: {
+              type: "plain_text_input",
+              action_id: "num_guess_input",
+              placeholder: {
+                type: "plain_text",
+                text: "18, 21, 3, 43, 56...",
+              },
+            },
+            label: {
+              type: "plain_text",
+              text: "Enter your guess for the number.",
+            },
+          },
+        ],
+      },
+    });
+  } catch (error) {
+    console.error("Error opening modal:", error);
+  }
+});
+
+app.view("num_guess_modal", async ({ ack, view, client }) => {
+  const userInput =
+    view.state.values["num_guess_block"]["num_guess_input"].value.trim();
+
+  if (!/^\d+$/.test(userInput)) {
+    await ack({
+      response_action: "errors",
+      errors: {
+        num_guess_block: "Guess must be a number.",
+      },
+    });
+    return;
+  }
+
+  await ack();
+
+  try {
+    const metadata = JSON.parse(view.private_metadata);
+    const { channelId, messageTs, number } = metadata;
+    let attempts = metadata.attempts + 1;
+    const userGuess = parseInt(userInput, 10);
+
+    if (userGuess === number) {
+      await client.chat.update({
+        channel: channelId,
+        ts: messageTs,
+        text: `Woah! You guessed the number correctly! It was *${number}*.\nNumber of attempts you did: *${attempts}*`,
+        blocks: [],
+      });
+    } else if (userGuess < number) {
+      const newGameState = JSON.stringify({ number, attempts });
+
+      await client.chat.update({
+        channel: channelId,
+        ts: messageTs,
+        text: `Your guess (*${userInput}*) is too low! Try again.\nAttempts: *${attempts}*`,
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `Your guess (*${userInput}*) is too low! Try again.\nAttempts: *${attempts}*`,
+            },
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  emoji: true,
+                  text: "Guess",
+                },
+                style: "primary",
+                action_id: "guess_btn",
+                value: newGameState,
+              },
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  emoji: true,
+                  text: "Give up",
+                },
+                style: "danger",
+                action_id: "give_up_btn",
+                value: newGameState,
+              },
+            ],
+          },
+        ],
+      });
+    } else if (userGuess > number) {
+      const newGameState = JSON.stringify({ number, attempts });
+
+      await client.chat.update({
+        channel: channelId,
+        ts: messageTs,
+        text: `Your guess (*${userInput}*) is too high! Try again.\nAttempts: *${attempts}*`,
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `Your guess (*${userInput}*) is too high! Try again.\nAttempts: *${attempts}*`,
+            },
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  emoji: true,
+                  text: "Guess",
+                },
+                style: "primary",
+                action_id: "guess_btn",
+                value: newGameState,
+              },
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  emoji: true,
+                  text: "Give up",
+                },
+                style: "danger",
+                action_id: "give_up_btn",
+                value: newGameState,
+              },
+            ],
+          },
+        ],
+      });
+    }
+  } catch (error) {
+    console.error("Error handling modal submission:", error);
+  }
+});
+
+app.action("give_up_btn", async ({ ack, body, action, client }) => {
+  await ack();
+
+  try {
+    const gameState = JSON.parse(action.value);
+    await client.chat.update({
+      channel: body.channel.id,
+      ts: body.message.ts,
+      text: `Haha! I knew you would give up! The number I had selected was *${gameState.number}*.\nNumber of attempts you did: *${gameState.attempts}*`,
+      blocks: [],
+    });
+  } catch (error) {
+    console.error("Error giving up:", error);
+  }
+});
+
 (async () => {
   await app.start();
   console.log("Bot has started running! Try a command!");
