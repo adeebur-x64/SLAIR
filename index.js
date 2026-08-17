@@ -720,6 +720,234 @@ app.action("guess_scissors", async ({ ack, body, action, client }) => {
   }
 });
 
+app.command("/slair-unscramble", async ({ command, ack, client }) => {
+  await ack();
+
+  const loading = await client.chat.postMessage({
+    channel: command.channel_id,
+    text: `I'm searching for a word and scrambling it!`,
+  });
+
+  async function fetchARandomWord() {
+    try {
+      const wordLength = Math.floor(Math.random() * (8 - 3 + 1)) + 3;
+      const dictionaryAPIURL = `https://random-word-api.herokuapp.com/word?length=${wordLength}`;
+      const response = await fetch(dictionaryAPIURL);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      return data[0];
+    } catch {
+      await client.chat.update({
+        channel: command.channel_id,
+        ts: loading.ts,
+        text: `Oops! I wasn't able to search for a word!`,
+      });
+      return null;
+    }
+  }
+
+  const randomWord = await fetchARandomWord();
+  if (!randomWord) return;
+
+  const scrambledWord = randomWord
+    .split("")
+    .sort(() => Math.random() - 0.5)
+    .join("");
+
+  const gameState = JSON.stringify({
+    word: randomWord,
+    scrambledWord,
+    attempts: 0,
+  });
+
+  await client.chat.update({
+    channel: command.channel_id,
+    ts: loading.ts,
+    text: `I have chosen the word and scrambled it! Here it is: *${scrambledWord}*`,
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `I have chosen the word and scrambled it! Here it is: *${scrambledWord}*`,
+        },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              emoji: true,
+              text: "Unscramble",
+            },
+            style: "primary",
+            action_id: "unscramble_btn",
+            value: gameState,
+          },
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              emoji: true,
+              text: "Give up",
+            },
+            style: "danger",
+            action_id: "give_up_btn",
+            value: gameState,
+          },
+        ],
+      },
+    ],
+  });
+});
+
+app.action("unscramble_btn", async ({ ack, body, action, client }) => {
+  await ack();
+
+  try {
+    const gameState = JSON.parse(action.value);
+    const metadata = JSON.stringify({
+      channelId: body.channel.id,
+      messageTs: body.message.ts,
+      word: gameState.word,
+      scrambledWord: gameState.scrambledWord,
+      attempts: gameState.attempts,
+    });
+
+    await client.views.open({
+      trigger_id: body.trigger_id,
+      view: {
+        type: "modal",
+        callback_id: "unscramble_guess_modal",
+        private_metadata: metadata,
+        title: { type: "plain_text", text: "Enter your guess" },
+        submit: { type: "plain_text", text: "Submit" },
+        close: { type: "plain_text", text: "Cancel" },
+        blocks: [
+          {
+            type: "input",
+            block_id: "unscramble_guess_block",
+            element: {
+              type: "plain_text_input",
+              action_id: "unscramble_guess_input",
+              placeholder: {
+                type: "plain_text",
+                text: "Bed, Derp, Nerd, Water, Window...",
+              },
+            },
+            label: {
+              type: "plain_text",
+              text: "Enter your guess for the scrambled word.",
+            },
+          },
+        ],
+      },
+    });
+  } catch (error) {
+    console.error("Error opening modal:", error);
+  }
+});
+
+app.view("unscramble_guess_modal", async ({ ack, view, client }) => {
+  const userInput =
+    view.state.values["unscramble_guess_block"][
+      "unscramble_guess_input"
+    ].value.trim();
+
+  if (!/^[a-zA-Z]+$/.test(userInput)) {
+    await ack({
+      response_action: "errors",
+      errors: {
+        unscramble_guess_block: "Guess must be a word.",
+      },
+    });
+    return;
+  }
+
+  await ack();
+
+  try {
+    const metadata = JSON.parse(view.private_metadata);
+    const { channelId, messageTs, word, scrambledWord } = metadata;
+    let attempts = metadata.attempts + 1;
+
+    if (userInput.toLowerCase() === word.toLowerCase()) {
+      await client.chat.update({
+        channel: channelId,
+        ts: messageTs,
+        text: `Woah! You guessed the word correctly! It was *${word}*.\nNumber of attempts you did: *${attempts}*`,
+        blocks: [],
+      });
+    } else {
+      const newGameState = JSON.stringify({ word, scrambledWord, attempts });
+
+      await client.chat.update({
+        channel: channelId,
+        ts: messageTs,
+        text: `Your guess (*${userInput}*) is incorrect! Try again.\nI have chosen the word and scrambled it! Here it is: *${scrambledWord}*\nAttempts: *${attempts}*`,
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `Your guess (*${userInput}*) is incorrect! Try again.\nI have chosen the word and scrambled it! Here it is: *${scrambledWord}*\nAttempts: *${attempts}*`,
+            },
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  emoji: true,
+                  text: "Unscramble",
+                },
+                style: "primary",
+                action_id: "unscramble_btn",
+                value: newGameState,
+              },
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  emoji: true,
+                  text: "Give up",
+                },
+                style: "danger",
+                action_id: "give_up_btn",
+                value: newGameState,
+              },
+            ],
+          },
+        ],
+      });
+    }
+  } catch (error) {
+    console.error("Error handling modal submission:", error);
+  }
+});
+
+app.action("give_up_btn", async ({ ack, body, action, client }) => {
+  await ack();
+
+  try {
+    const gameState = JSON.parse(action.value);
+    await client.chat.update({
+      channel: body.channel.id,
+      ts: body.message.ts,
+      text: `Haha! I knew you would give up! The word I had selected was *${gameState.word}*.\nNumber of attempts you did: *${gameState.attempts}*`,
+      blocks: [],
+    });
+  } catch (error) {
+    console.error("Error giving up:", error);
+  }
+});
+
 (async () => {
   await app.start();
   console.log("Bot has started running! Try a command!");
