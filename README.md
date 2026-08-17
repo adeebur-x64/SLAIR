@@ -31,7 +31,7 @@
 
 ## 🌟 Features
 
-`~/KLAIR` is designed to be a small, fun, free-to-use bot that aims to add a bunch of entertaining features to your server.
+`~/SLAIR` is designed to be a small, fun, free-to-use bot that aims to add a bunch of entertaining features to your server.
 
 <details>
 <summary><strong>🎮 Mini Games</strong> · 5 commands</summary>
@@ -40,10 +40,10 @@
 
 | Command              | Description             |
 | -------------------- | ----------------------- |
-| `/coinflip`          | Flip a coin             |
-| `/guessthenumber`    | Try to guess the number |
-| `/rockpaperscissors` | Challenge the bot       |
-| `/unscramble`        | Unscramble the word     |
+| `/slair-coinflip`          | Flip a coin             |
+| `/slair-guessthenumber`    | Try to guess the number |
+| `/slair-rps` | Challenge the bot       |
+| `/slair-unscramble`        | Unscramble the word     |
 
 </details>
 
@@ -54,11 +54,11 @@
 
 | Command        | Description                       |
 | -------------- | --------------------------------- |
-| `/8ball`       | Ask the magic 8-ball              |
-| `/cat`         | Get a random cat                  |
-| `/dog`         | Get a random dog                  |
-| `/cryptoprice` | Check cryptocurrency prices       |
-| `/uselessfact` | Receive a completely useless fact |
+| `/slair-8ball`       | Ask the magic 8-ball              |
+| `/slair-cat`         | Get a random cat                  |
+| `/slair-dog`         | Get a random dog                  |
+| `/slair-cryptoprice` | Check cryptocurrency prices       |
+| `/slair-uselessfact` | Receive a completely useless fact |
 
 </details>
 
