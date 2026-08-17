@@ -796,7 +796,7 @@ app.command("/slair-unscramble", async ({ command, ack, client }) => {
               text: "Give up",
             },
             style: "danger",
-            action_id: "give_up_btn",
+            action_id: "unscramble_give_up_btn",
             value: gameState,
           },
         ],
@@ -919,7 +919,7 @@ app.view("unscramble_guess_modal", async ({ ack, view, client }) => {
                   text: "Give up",
                 },
                 style: "danger",
-                action_id: "give_up_btn",
+                action_id: "unscramble_give_up_btn",
                 value: newGameState,
               },
             ],
@@ -932,7 +932,7 @@ app.view("unscramble_guess_modal", async ({ ack, view, client }) => {
   }
 });
 
-app.action("give_up_btn", async ({ ack, body, action, client }) => {
+app.action("unscramble_give_up_btn", async ({ ack, body, action, client }) => {
   await ack();
 
   try {
@@ -1012,7 +1012,7 @@ app.command("/slair-guessthenumber", async ({ command, ack, client }) => {
               text: "Give up",
             },
             style: "danger",
-            action_id: "give_up_btn",
+            action_id: "guess_num_give_up_btn",
             value: gameState,
           },
         ],
@@ -1133,7 +1133,7 @@ app.view("num_guess_modal", async ({ ack, view, client }) => {
                   text: "Give up",
                 },
                 style: "danger",
-                action_id: "give_up_btn",
+                action_id: "guess_num_give_up_btn",
                 value: newGameState,
               },
             ],
@@ -1177,7 +1177,7 @@ app.view("num_guess_modal", async ({ ack, view, client }) => {
                   text: "Give up",
                 },
                 style: "danger",
-                action_id: "give_up_btn",
+                action_id: "guess_num_give_up_btn",
                 value: newGameState,
               },
             ],
@@ -1190,7 +1190,7 @@ app.view("num_guess_modal", async ({ ack, view, client }) => {
   }
 });
 
-app.action("give_up_btn", async ({ ack, body, action, client }) => {
+app.action("guess_num_give_up_btn", async ({ ack, body, action, client }) => {
   await ack();
 
   try {
