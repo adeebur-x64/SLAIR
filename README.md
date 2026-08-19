@@ -5,21 +5,28 @@
 
 ---
 
-## All the commands!
-
-|    🎮 Mini Games    |   🛠️ Other   |
-| :-----------------: | :----------: |
-|      Coin flip      |    8ball     |
-|  Guess the number   |     Cat      |
-| Rock Paper Scissors |     Dog      |
-|     Unscramble      | Crypto Price |
-|        ----         | Useless Fact |
-
----
+> [!NOTE]  
+> Information for the hackathon judges (shipwrights ig) - **[🛑 README.md Information](#-readmemd-information)**.
 
 ## 🤔 Where does the name `~/SLAIR` come from?
 
 **The name `~/SLAIR` comes from my other project `~/KLAIR` which was a Discord Bot. As this bot is similar to `~/KLAIR` in features but for Slack instead of Discord, I've decided to name it `~/SLAIR`**.
+
+---
+
+## 🌟 Features
+
+The bot contains some cool features that you could use if you're bored:
+
+1. `/slair-cat` - Fetch a cat image!
+2. `/slair-dog` - Fetch a dog image!
+3. `/slair-uselessfact` - Fetches a useless fact!
+4. `/slair-cryptoprice` - Fetches the price of your desired cryptocurrency!
+5. `/slair-8ball` - Ask the magic 8-ball!
+6. `/slair-coinflip` - Flip a coin
+7. `/slair-rps` - Play Rock Paper Scissors against the bot!
+8. `/slair-unscramble` - Unscramble the word!
+9. `/slair-guessthenumber` - Guess the number!
 
 ---
 
@@ -29,43 +36,9 @@
 
 ---
 
-## 🌟 Features
+## 🛑 README.md Information
 
-`~/KLAIR` is designed to be a small, fun, free-to-use bot that aims to add a bunch of entertaining features to your server.
-
-<details>
-<summary><strong>🎮 Mini Games</strong> · 5 commands</summary>
-
-<br>
-
-| Command              | Description             |
-| -------------------- | ----------------------- |
-| `/coinflip`          | Flip a coin             |
-| `/guessthenumber`    | Try to guess the number |
-| `/rockpaperscissors` | Challenge the bot       |
-| `/unscramble`        | Unscramble the word     |
-
-</details>
-
-<details>
-<summary><strong>🛠️ Other Commands</strong> · 5 commands</summary>
-
-<br>
-
-| Command        | Description                       |
-| -------------- | --------------------------------- |
-| `/8ball`       | Ask the magic 8-ball              |
-| `/cat`         | Get a random cat                  |
-| `/dog`         | Get a random dog                  |
-| `/cryptoprice` | Check cryptocurrency prices       |
-| `/uselessfact` | Receive a completely useless fact |
-
-</details>
-
----
-
-## ❗❗ README.md Information
-
-> This README.md file was **originally** built for the `~/KLAIR` project, which was a Discord Bot. **AI was used to create some parts of the README.md file** (like the table showing the features) **in both projects!**.
+> **README.md is now manually written by human 🤍**  
+> Please note that, **I've only removed the AI Generated parts of the README from here**. The stuff that are still the same from the previous commits were created manually by me in the first place so, they're still here.
 
 ---
